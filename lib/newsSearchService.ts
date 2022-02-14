@@ -44,9 +44,16 @@ const mapNewsItem = (item: Hit<NewsItemResponse>) => {
 };
 
 export const fetchNewsItems = async (): Promise<NewsItem[]> => {
+  const { hits } = await agolia.search<NewsItemResponse>("");
+
+  return hits.map(mapNewsItem);
+};
+
+export const fetchNewsItem = async (slug: string): Promise<NewsItem | null> => {
   const { hits } = await agolia.search<NewsItemResponse>("", {
+    filters: `slug:${slug}`,
     attributesToRetrieve: DEFAULT_NEWS_ATTRS,
   });
 
-  return hits.map(mapNewsItem);
+  return hits[0] ? mapNewsItem(hits[0]) : null;
 };
