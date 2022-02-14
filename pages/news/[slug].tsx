@@ -15,7 +15,7 @@ interface Params extends ParsedUrlQuery {
 }
 
 export const getStaticPaths: GetStaticPaths<Params> = async () => {
-  const newsItems = await fetchNewsItems();
+  const { data: newsItems } = await fetchNewsItems();
   const paths = newsItems.map(({ slug }) => ({
     params: {
       slug,

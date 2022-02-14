@@ -1,16 +1,22 @@
 import { Box, CircularProgress, Grid, Typography } from "@mui/material";
-import React, { FC } from "react";
-
+import React, { FC, useState } from "react";
+import { useQuery } from "react-query";
 import { NewsItem } from "../lib/newsSearchService";
 
+import { IObserver } from "./IObserver";
 import { NewsArticle } from "./NewsArticle";
 
 interface NewsListProps {
+  loadNextPage: () => void;
   newsItems: NewsItem[];
   isLoading: boolean;
 }
 
-export const NewsList: FC<NewsListProps> = ({ newsItems, isLoading }) => {
+export const NewsList: FC<NewsListProps> = ({
+  newsItems,
+  loadNextPage,
+  isLoading,
+}) => {
   return (
     <>
       <Grid item lg={9} component={"ul"}>
@@ -45,6 +51,8 @@ export const NewsList: FC<NewsListProps> = ({ newsItems, isLoading }) => {
             <NewsArticle {...n} orientation="horizontal" />
           </Grid>
         ))}
+
+        {!!newsItems.length && <IObserver onIntersecting={loadNextPage} />}
 
         {isLoading && (
           <Box textAlign={"center"}>

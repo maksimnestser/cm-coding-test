@@ -1,31 +1,54 @@
 import { Container, Grid } from "@mui/material";
 import React, { FC, useState } from "react";
 import { useQuery } from "react-query";
-import { fetchNewsItems, NewsItem } from "../lib/newsSearchService";
+import { fetchNewsItems, NewsItemsData } from "../lib/newsSearchService";
 import { FilterBox } from "./FilterBox";
 import { NewsList } from "./NewsList";
 
-interface NewsListLayoutProps {
+interface NewsListProps {
   searchLabel: string;
 }
 
-export const NewsListLayout: FC<NewsListLayoutProps> = ({ searchLabel }) => {
-  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+export const NewsListLayout: FC<NewsListProps> = ({ searchLabel }) => {
+  const [page, setPage] = useState(0);
+  const [filters, setFilters] = useState("");
+  const [{ data: newsItems, hitsPerPage, nbHits }, setNewsItems] =
+    useState<NewsItemsData>({
+      data: [],
+      nbHits: 0,
+      hitsPerPage: 0,
+    });
 
   const { isLoading } = useQuery(
-    "news",
+    ["news", filters, page],
     () => {
-      return fetchNewsItems();
+      return fetchNewsItems("", { page, filters });
     },
     {
       onSuccess: (data) => {
-        setNewsItems(data);
+        setNewsItems((prev) =>
+          page ? { ...data, data: prev.data.concat(data.data) } : data
+        );
       },
       refetchOnWindowFocus: false,
     }
   );
 
-  const onSubmit = () => {};
+  const onSubmit = async (query: string) => {
+    /* Didn't manage to make filtering work not only for an exact match 😔. 
+    Works for 'Mental Health' but not 'Mental'.
+    There is a way to call client like client.search("Mental") 
+    and then check in _highlightedResult for topics.title 
+    but I think this the wrong way */
+    setFilters(query ? `topics.title:'${query}'` : "");
+    setPage(0);
+  };
+
+  const loadNextPage = () => {
+    if ((page + 1) * hitsPerPage < nbHits) {
+      setPage((page) => page + 1);
+    }
+  };
 
   return (
     <Container maxWidth={"lg"} component="main">
@@ -33,7 +56,11 @@ export const NewsListLayout: FC<NewsListLayoutProps> = ({ searchLabel }) => {
         <Grid item lg={3}>
           <FilterBox searchLabel={searchLabel} onSubmit={onSubmit} />
         </Grid>
-        <NewsList newsItems={newsItems} isLoading={isLoading} />
+        <NewsList
+          loadNextPage={loadNextPage}
+          newsItems={newsItems}
+          isLoading={isLoading}
+        />
       </Grid>
     </Container>
   );

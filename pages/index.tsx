@@ -7,15 +7,16 @@ import { NewsHeader } from "../components/NewsHeader";
 import { PopularNews } from "../components/PopularNews";
 import { fetchNewsPageData, NewsPageData } from "../lib/newsService";
 import { NewsListLayout } from "../components/NewsListLayout";
+import { GetStaticProps } from "next";
 
-export const getStaticProps = async () => {
+export const getStaticProps: GetStaticProps<NewsPageProps> = async () => {
   const [pageData, popularNews] = await Promise.all([
     fetchNewsPageData(),
     fetchNewsItems(),
   ]);
 
   return {
-    props: { pageData, popularNews },
+    props: { pageData, popularNews: popularNews.data },
   };
 };
 

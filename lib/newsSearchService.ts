@@ -1,6 +1,7 @@
 import { formatDateWithLocale } from "../utils/Dates";
-import agolia from "./algoliaService";
-import { Hit } from "@algolia/client-search";
+import client from "./algoliaService";
+import { Hit, SearchOptions } from "@algolia/client-search";
+import { RequestOptions } from "@algolia/transporter";
 
 interface NewsItemResponse {
   slug: string;
@@ -17,7 +18,10 @@ interface NewsItemResponse {
     };
   }>;
 }
+
 export type NewsItem = ReturnType<typeof mapNewsItem>;
+type PromiseInfer<T> = T extends Promise<infer S> ? S : never;
+export type NewsItemsData = PromiseInfer<ReturnType<typeof fetchNewsItems>>;
 
 const DEFAULT_NEWS_ATTRS = [
   "slug",
@@ -43,14 +47,26 @@ const mapNewsItem = (item: Hit<NewsItemResponse>) => {
   };
 };
 
-export const fetchNewsItems = async (): Promise<NewsItem[]> => {
-  const { hits } = await agolia.search<NewsItemResponse>("");
+export const fetchNewsItems = async (
+  query = "",
+  params: RequestOptions & SearchOptions = {
+    attributesToRetrieve: DEFAULT_NEWS_ATTRS,
+  }
+) => {
+  const { hits, nbHits, hitsPerPage } = await client.search<NewsItemResponse>(
+    query,
+    params
+  );
 
-  return hits.map(mapNewsItem);
+  return {
+    data: hits.map(mapNewsItem),
+    nbHits,
+    hitsPerPage,
+  };
 };
 
-export const fetchNewsItem = async (slug: string): Promise<NewsItem | null> => {
-  const { hits } = await agolia.search<NewsItemResponse>("", {
+export const fetchNewsItem = async (slug: string) => {
+  const { hits } = await client.search<NewsItemResponse>("", {
     filters: `slug:${slug}`,
     attributesToRetrieve: DEFAULT_NEWS_ATTRS,
   });
