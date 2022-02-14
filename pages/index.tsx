@@ -6,6 +6,7 @@ import { NewsHeader } from "../components/NewsHeader";
 
 import { PopularNews } from "../components/PopularNews";
 import { fetchNewsPageData, NewsPageData } from "../lib/newsService";
+import { NewsListLayout } from "../components/NewsListLayout";
 
 export const getStaticProps = async () => {
   const [pageData, popularNews] = await Promise.all([
@@ -26,7 +27,7 @@ interface NewsPageProps {
 const POPULAR_NEWS_COUNT = 3;
 
 const NewsPage: FC<NewsPageProps> = ({
-  pageData: { logoData, title, menuLabel },
+  pageData: { logoData, title, menuLabel, searchLabel },
   popularNews,
 }) => {
   return (
@@ -61,6 +62,7 @@ const NewsPage: FC<NewsPageProps> = ({
           <PopularNews news={popularNews.slice(0, POPULAR_NEWS_COUNT)} />
         </Container>
       </Box>
+      <NewsListLayout searchLabel={searchLabel} />
     </Box>
   );
 };
