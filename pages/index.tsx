@@ -1,24 +1,33 @@
-import { Box } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 import Head from "next/head";
 import React, { FC } from "react";
-
+import { fetchNewsItems, NewsItem } from "../lib/newsSearchService";
 import { NewsHeader } from "../components/NewsHeader";
+
+import { PopularNews } from "../components/PopularNews";
 import { fetchNewsPageData, NewsPageData } from "../lib/newsService";
 
 export const getStaticProps = async () => {
-  const pageData = await fetchNewsPageData();
+  const [pageData, popularNews] = await Promise.all([
+    fetchNewsPageData(),
+    fetchNewsItems(),
+  ]);
 
   return {
-    props: { pageData },
+    props: { pageData, popularNews },
   };
 };
 
 interface NewsPageProps {
   pageData: NewsPageData;
+  popularNews: NewsItem[];
 }
+
+const POPULAR_NEWS_COUNT = 3;
 
 const NewsPage: FC<NewsPageProps> = ({
   pageData: { logoData, title, menuLabel },
+  popularNews,
 }) => {
   return (
     <Box>
@@ -26,6 +35,32 @@ const NewsPage: FC<NewsPageProps> = ({
         <title>{title}</title>
       </Head>
       <NewsHeader logoData={logoData} menuLabel={menuLabel} />
+      <Box
+        sx={{ borderBottom: "1px solid", borderColor: "grey.200", mb: 2 }}
+        component="section"
+      >
+        <Container
+          sx={{
+            pb: 2,
+          }}
+          maxWidth="lg"
+        >
+          <Typography
+            variant="h2"
+            sx={{
+              pt: 6,
+              pb: 8,
+              color: "text.primary",
+              fontWeight: "fontWeightBold",
+              textAlign: "center",
+              fontSize: "2rem",
+            }}
+          >
+            {title}
+          </Typography>
+          <PopularNews news={popularNews.slice(0, POPULAR_NEWS_COUNT)} />
+        </Container>
+      </Box>
     </Box>
   );
 };
