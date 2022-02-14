@@ -8,6 +8,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
+    "@mui/icons-material": "^5.4.1",
+    "@mui/material": "^5.4.1",
     "algoliasearch": "^4.11.0",
     "contentful": "^9.1.5",
     "next": "12.0.7",
@@ -16,6 +20,7 @@
     "react-query": "^3.34.0"
   },
   "devDependencies": {
+    "@material-ui/types": "^5.1.0",
     "@types/node": "16.11.12",
     "@types/react": "17.0.37",
     "eslint": "8.4.1",
